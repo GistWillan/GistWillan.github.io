@@ -63,7 +63,6 @@ const anzhiyu = {
     const bg = document.documentElement.getAttribute("data-theme") === "light" ? bgLight : bgDark;
     const root = document.querySelector(":root");
     root.style.setProperty("--anzhiyu-snackbar-time", duration + "ms");
-
     Snackbar.show({
       text: text,
       backgroundColor: bg,
@@ -72,41 +71,6 @@ const anzhiyu = {
       pos: position,
       customClass: "snackbar-css",
     });
-  },
-
-  diffDate: (d, more = false) => {
-    const dateNow = new Date();
-    const datePost = new Date(d);
-    const dateDiff = dateNow.getTime() - datePost.getTime();
-    const minute = 1000 * 60;
-    const hour = minute * 60;
-    const day = hour * 24;
-    const month = day * 30;
-
-    let result;
-    if (more) {
-      const monthCount = dateDiff / month;
-      const dayCount = dateDiff / day;
-      const hourCount = dateDiff / hour;
-      const minuteCount = dateDiff / minute;
-
-      if (monthCount > 12) {
-        result = datePost.toLocaleDateString().replace(/\//g, "-");
-      } else if (monthCount >= 1) {
-        result = parseInt(monthCount) + " " + GLOBAL_CONFIG.date_suffix.month;
-      } else if (dayCount >= 1) {
-        result = parseInt(dayCount) + " " + GLOBAL_CONFIG.date_suffix.day;
-      } else if (hourCount >= 1) {
-        result = parseInt(hourCount) + " " + GLOBAL_CONFIG.date_suffix.hour;
-      } else if (minuteCount >= 1) {
-        result = parseInt(minuteCount) + " " + GLOBAL_CONFIG.date_suffix.min;
-      } else {
-        result = GLOBAL_CONFIG.date_suffix.just;
-      }
-    } else {
-      result = parseInt(dateDiff / day);
-    }
-    return result;
   },
 
   loadComment: (dom, callback) => {
@@ -298,7 +262,7 @@ const anzhiyu = {
   },
 
   //更改主题色
-  changeThemeColor: function (color) {
+  changeThemeMetaColor: function (color) {
     // console.info(`%c ${color}`, `font-size:36px;color:${color};`);
     if (themeColorMeta !== null) {
       themeColorMeta.setAttribute("content", color);
@@ -313,7 +277,7 @@ const anzhiyu = {
       .replace('"', "")
       .replace('"', "");
     const currentTop = window.scrollY || document.documentElement.scrollTop;
-    if (currentTop > 56) {
+    if (currentTop > 26) {
       if (anzhiyu.is_Post()) {
         themeColor = getComputedStyle(document.documentElement)
           .getPropertyValue("--anzhiyu-meta-theme-post-color")
@@ -322,11 +286,31 @@ const anzhiyu = {
           .replace('"', "");
       }
       if (themeColorMeta.getAttribute("content") === themeColor) return;
-      this.changeThemeColor(themeColor);
+      this.changeThemeMetaColor(themeColor);
     } else {
       if (themeColorMeta.getAttribute("content") === themeColor) return;
-      this.changeThemeColor(themeColor);
+      this.changeThemeMetaColor(themeColor);
     }
+  },
+  switchDarkMode: () => {
+    // Switch Between Light And Dark Mode
+    const nowMode = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    const rightMenu = document.getElementById("rightMenu");
+    if (nowMode === "light") {
+      activateDarkMode();
+      saveToLocal.set("theme", "dark", 2);
+      GLOBAL_CONFIG.Snackbar !== undefined && anzhiyu.snackbarShow(GLOBAL_CONFIG.Snackbar.day_to_night);
+      rightMenu.querySelector(".menu-darkmode-text").textContent = "浅色模式";
+    } else {
+      activateLightMode();
+      saveToLocal.set("theme", "light", 2);
+      GLOBAL_CONFIG.Snackbar !== undefined && anzhiyu.snackbarShow(GLOBAL_CONFIG.Snackbar.night_to_day);
+      rightMenu.querySelector(".menu-darkmode-text").textContent = "深色模式";
+    }
+    // handle some cases
+    typeof runMermaid === "function" && window.runMermaid();
+    rm && rm.hideRightMenu();
+    anzhiyu.darkModeStatus();
   },
   //是否是文章页
   is_Post: function () {
@@ -343,8 +327,8 @@ const anzhiyu = {
     var scrollTop = 0,
       bodyScrollTop = 0,
       documentScrollTop = 0;
-    if (document.body) {
-      bodyScrollTop = document.body.scrollTop;
+    if ($bodyWrap) {
+      bodyScrollTop = $bodyWrap.scrollTop;
     }
     if (document.documentElement) {
       documentScrollTop = document.documentElement.scrollTop;
@@ -352,10 +336,6 @@ const anzhiyu = {
     scrollTop = bodyScrollTop - documentScrollTop > 0 ? bodyScrollTop : documentScrollTop;
 
     if (scrollTop != 0) {
-      pageHeaderEl.classList.add("nav-fixed");
-      pageHeaderEl.classList.add("nav-visible");
-    }
-    if (pageHeaderEl.querySelector(".bili-banner")) {
       pageHeaderEl.classList.add("nav-fixed");
       pageHeaderEl.classList.add("nav-visible");
     }
@@ -422,14 +402,14 @@ const anzhiyu = {
   switchCommentBarrage: function () {
     let commentBarrage = document.querySelector(".comment-barrage");
     if (commentBarrage) {
-      if (window.getComputedStyle(commentBarrage).display === "block") {
+      if (window.getComputedStyle(commentBarrage).display === "flex") {
         commentBarrage.style.display = "none";
         anzhiyu.snackbarShow("✨ 已关闭评论弹幕");
         document.querySelector(".menu-commentBarrage-text").textContent = "显示热评";
         document.querySelector("#consoleCommentBarrage").classList.remove("on");
         localStorage.setItem("commentBarrageSwitch", "false");
       } else {
-        commentBarrage.style.display = "block";
+        commentBarrage.style.display = "flex";
         document.querySelector(".menu-commentBarrage-text").textContent = "关闭热评";
         document.querySelector("#consoleCommentBarrage").classList.add("on");
         anzhiyu.snackbarShow("✨ 已开启评论弹幕");
@@ -440,7 +420,7 @@ const anzhiyu = {
   },
   // 初始化即刻
   initIndexEssay: function () {
-    if (!document.querySelector(".essay_bar_swiper_container")) return;
+    if (!document.getElementById("bbTimeList")) return;
     setTimeout(() => {
       let essay_bar_swiper = new Swiper(".essay_bar_swiper_container", {
         passiveListeners: true,
@@ -450,7 +430,7 @@ const anzhiyu = {
           disableOnInteraction: true,
           delay: 3000,
         },
-        mousewheel: true,
+        mousewheel: false,
       });
 
       let essay_bar_comtainer = document.getElementById("bbtalk");
@@ -463,6 +443,33 @@ const anzhiyu = {
         };
       }
     }, 100);
+  },
+  scrollByMouseWheel: function ($list, $target) {
+    const scrollHandler = function (e) {
+      $list.scrollLeft -= e.wheelDelta / 2;
+      e.preventDefault();
+    };
+    $list.addEventListener("mousewheel", scrollHandler, { passive: false });
+    if ($target) {
+      $target.classList.add("selected");
+      $list.scrollLeft = $target.offsetLeft - $list.offsetLeft - ($list.offsetWidth - $target.offsetWidth) / 2;
+    }
+  },
+  // catalog激活
+  catalogActive: function () {
+    const $list = document.getElementById("catalog-list");
+    if ($list) {
+      const $catalog = document.getElementById(decodeURIComponent(window.location.pathname));
+      anzhiyu.scrollByMouseWheel($list, $catalog);
+    }
+  },
+  // Page Tag 激活
+  tagsPageActive: function () {
+    const $list = document.getElementById("tag-page-tags");
+    if ($list) {
+      const $tagPageTags = document.getElementById(decodeURIComponent(window.location.pathname));
+      anzhiyu.scrollByMouseWheel($list, $tagPageTags);
+    }
   },
   // 修改时间显示"最近"
   diffDate: function (d, more = false) {
@@ -557,14 +564,35 @@ const anzhiyu = {
     input.focus();
     input.setSelectionRange(-1, -1);
   },
+  //友链随机传送
+  travelling() {
+    var fetchUrl = GLOBAL_CONFIG.friends_vue_info.apiurl + "randomfriend";
+    fetch(fetchUrl)
+      .then(res => res.json())
+      .then(json => {
+        var name = json.name;
+        var link = json.link;
+        Snackbar.show({
+          text:
+            "点击前往按钮进入随机一个友链，不保证跳转网站的安全性和可用性。本次随机到的是本站友链：「" + name + "」",
+          duration: 8000,
+          pos: "top-center",
+          actionText: "前往",
+          onActionClick: function (element) {
+            element.style.opacity = 0;
+            window.open(link, "_blank");
+          },
+        });
+      });
+  },
   //切换音乐播放状态
   musicToggle: function (changePaly = true) {
     if (!anzhiyu_musicFirst) {
       anzhiyu.musicBindEvent();
       anzhiyu_musicFirst = true;
     }
-    let msgPlay = '<i class="fa-solid fa-play"></i><span>播放音乐</span>'; // 此處可以更改為你想要顯示的文字
-    let msgPause = '<i class="fa-solid fa-pause"></i><span>暂停音乐</span>'; // 同上，但兩處均不建議更改
+    let msgPlay = '<i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span>';
+    let msgPause = '<i class="anzhiyufont anzhiyu-icon-pause"></i><span>暂停音乐</span>';
     if (anzhiyu_musicPlaying) {
       navMusicEl.classList.remove("playing");
       document.getElementById("menu-music-toggle").innerHTML = msgPlay;
@@ -605,7 +633,7 @@ const anzhiyu = {
 
   //获取音乐中的名称
   musicGetName: function () {
-    var x = $(".aplayer-title");
+    var x = document.querySelector(".aplayer-title");
     var arr = [];
     for (var i = x.length - 1; i >= 0; i--) {
       arr[i] = x[i].innerText;
@@ -616,10 +644,12 @@ const anzhiyu = {
   // 检测显示模式
   darkModeStatus: function () {
     let theme = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
-    if (theme == "light") {
-      $(".menu-darkmode-text").text("深色模式");
+    const menuDarkmodeText = document.querySelector(".menu-darkmode-text");
+
+    if (theme === "light") {
+      menuDarkmodeText.textContent = "深色模式";
     } else {
-      $(".menu-darkmode-text").text("浅色模式");
+      menuDarkmodeText.textContent = "浅色模式";
     }
   },
 
@@ -638,6 +668,11 @@ const anzhiyu = {
     consoleEl.classList.add("reward-show");
     anzhiyu.initConsoleState();
   },
+  // 显示中控台
+  showConsole: function () {
+    document.querySelector("#console").classList.add("show");
+    anzhiyu.initConsoleState();
+  },
 
   //隐藏中控台
   hideConsole: function () {
@@ -648,6 +683,10 @@ const anzhiyu = {
       // 如果是打赏控制台，就关闭打赏控制台
       consoleEl.classList.remove("reward-show");
     }
+  },
+  // 取消加载动画
+  hideLoading: function () {
+    document.getElementById("loading-box").classList.add("loaded");
   },
   // 将音乐缓存播放
   cacheAndPlayMusic() {
@@ -723,6 +762,7 @@ const anzhiyu = {
       // player listswitch 会进入此处
       const musiccover = document.querySelector("#anMusic-page .aplayer-pic");
       anMusicBg.style.backgroundImage = musiccover.style.backgroundImage;
+      $web_container.style.background = "none";
     } else {
       // 第一次进入，绑定事件，改背景
       let timer = setInterval(() => {
@@ -751,7 +791,6 @@ const anzhiyu = {
     if (!window.location.pathname.startsWith("/music/")) {
       return;
     }
-    console.info(window.location.pathname);
     const urlParams = new URLSearchParams(window.location.search);
     const userId = "8152976493";
     const userServer = "netease";
@@ -769,6 +808,11 @@ const anzhiyu = {
   hideTodayCard: function () {
     if (document.getElementById("todayCard")) {
       document.getElementById("todayCard").classList.add("hide");
+      const topGroup = document.querySelector(".topGroup");
+      const recentPostItems = topGroup.querySelectorAll(".recent-post-item");
+      recentPostItems.forEach(item => {
+        item.style.display = "flex";
+      });
     }
   },
 
@@ -789,12 +833,19 @@ const anzhiyu = {
     aplayerIconMenu.addEventListener("click", function () {
       document.getElementById("menu-mask").style.display = "block";
       document.getElementById("menu-mask").style.animation = "0.5s ease 0s 1 normal none running to_show";
+      anMusicPage.querySelector(".aplayer.aplayer-withlist .aplayer-list").style.opacity = "1";
     });
 
-    document.getElementById("menu-mask").addEventListener("click", function () {
-      if (window.location.pathname != "/music/") return;
+    function anMusicPageMenuAask() {
+      if (window.location.pathname != "/music/") {
+        document.getElementById("menu-mask").removeEventListener("click", anMusicPageMenuAask);
+        return;
+      }
+
       anMusicPage.querySelector(".aplayer-list").classList.remove("aplayer-list-hide");
-    });
+    }
+
+    document.getElementById("menu-mask").addEventListener("click", anMusicPageMenuAask);
 
     // 监听增加单曲按钮
     anMusicBtnGetSong.addEventListener("click", () => {
@@ -900,22 +951,23 @@ const anzhiyu = {
   },
   // 监听按键
   toPage: function () {
-    var e = document.querySelectorAll(".page-number"),
-      t = e[e.length - 1].innerHTML,
-      n = Number(t),
-      a = document.getElementById("toPageText"),
-      o = Number(a.value);
-    if ("" != o && !isNaN(o) && o % 1 == 0)
-      if (1 == o) document.getElementById("toPageButton").href = "/";
-      else if (o > n) {
-        var d = "/page/" + n + "/";
-        document.getElementById("toPageButton").href = d;
-      } else (d = "/page/" + a.value + "/"), (document.getElementById("toPageButton").href = d);
+    var toPageText = document.getElementById("toPageText"),
+      toPageButton = document.getElementById("toPageButton"),
+      pageNumbers = document.querySelectorAll(".page-number"),
+      lastPageNumber = Number(pageNumbers[pageNumbers.length - 1].innerHTML),
+      pageNumber = Number(toPageText.value);
+
+    if (!isNaN(pageNumber) && pageNumber >= 1 && Number.isInteger(pageNumber)) {
+      var url = "/page/" + (pageNumber > lastPageNumber ? lastPageNumber : pageNumber) + "/";
+      toPageButton.href = pageNumber === 1 ? "/" : url;
+    } else {
+      toPageButton.href = "javascript:void(0);";
+    }
   },
+
   //删除多余的class
   removeBodyPaceClass: function () {
-    var body = document.querySelector("body");
-    body.className = "pace-done";
+    document.body.className = "pace-done";
   },
   // 修改body的type类型以适配css
   setValueToBodyType: function () {
@@ -1030,6 +1082,22 @@ const anzhiyu = {
     }
     return isMobile;
   },
+
+  // 创建二维码
+  qrcodeCreate: function () {
+    if (document.getElementById("qrcode")) {
+      document.getElementById("qrcode").innerHTML = "";
+      var qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: window.location.href,
+        width: 250,
+        height: 250,
+        colorDark: "#000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H,
+      });
+    }
+  },
+
   // 判断是否在el内
   isInViewPortOfOne: function (el) {
     if (!el) return;
@@ -1039,4 +1107,127 @@ const anzhiyu = {
     const top = offsetTop - scrollTop;
     return top <= viewPortHeight;
   },
+  //添加赞赏蒙版
+  addRewardMask: function () {
+    if (!document.querySelector(".reward-main")) return;
+    document.querySelector(".reward-main").style.display = "flex";
+    document.querySelector(".reward-main").style.zIndex = "102";
+    document.getElementById("quit-box").style.display = "flex";
+  },
+  // 移除赞赏蒙版
+  removeRewardMask: function () {
+    if (!document.querySelector(".reward-main")) return;
+    document.querySelector(".reward-main").style.display = "none";
+    document.getElementById("quit-box").style.display = "none";
+  },
+
+  keyboardToggle: function () {
+    const isKeyboardOn = anzhiyu_keyboard;
+
+    if (isKeyboardOn) {
+      const consoleKeyboard = document.querySelector("#consoleKeyboard");
+      consoleKeyboard.classList.remove("on");
+      anzhiyu_keyboard = false;
+    } else {
+      const consoleKeyboard = document.querySelector("#consoleKeyboard");
+      consoleKeyboard.classList.add("on");
+      anzhiyu_keyboard = true;
+    }
+
+    localStorage.setItem("keyboardToggle", isKeyboardOn ? "false" : "true");
+  },
+  rightMenuToggle: function () {
+    if (window.oncontextmenu) {
+      window.oncontextmenu = null;
+    } else if (!window.oncontextmenu && oncontextmenuFunction) {
+      window.oncontextmenu = oncontextmenuFunction;
+    }
+  },
+  // 定义 intersectionObserver 函数，并接收两个可选参数
+  intersectionObserver: function (enterCallback, leaveCallback) {
+    let observer;
+    return () => {
+      if (!observer) {
+        observer = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (entry.intersectionRatio > 0) {
+              enterCallback?.();
+            } else {
+              leaveCallback?.();
+            }
+          });
+        });
+      } else {
+        // 如果 observer 对象已经存在，则先取消对之前元素的观察
+        observer.disconnect();
+      }
+      return observer;
+    };
+  },
+  // CategoryBar滚动
+  scrollCategoryBarToRight: function () {
+    // 获取需要操作的元素
+    const items = document.getElementById("catalog-list");
+    const nextButton = document.getElementById("category-bar-next");
+
+    // 检查元素是否存在
+    if (items && nextButton) {
+      const itemsWidth = items.clientWidth;
+
+      // 判断是否已经滚动到最右侧
+      if (items.scrollLeft + items.clientWidth + 1 >= items.scrollWidth) {
+        // 滚动到初始位置并更新按钮内容
+        items.scroll({
+          left: 0,
+          behavior: "smooth",
+        });
+        nextButton.innerHTML = '<i class="anzhiyufont anzhiyu-icon-angle-double-right"></i>';
+      } else {
+        // 滚动到下一个视图
+        items.scrollBy({
+          left: itemsWidth,
+          behavior: "smooth",
+        });
+      }
+    } else {
+      console.error("Element(s) not found: 'catalog-list' and/or 'category-bar-next'.");
+    }
+  },
+  // 分类条
+  categoriesBarActive: function () {
+    const urlinfo = decodeURIComponent(window.location.pathname);
+    const $categoryBar = document.getElementById("category-bar");
+    if (!$categoryBar) return;
+
+    if (urlinfo === "/") {
+      $categoryBar.querySelector("#首页").classList.add("select");
+    } else {
+      const pattern = /\/categories\/.*?\//;
+      const patbool = pattern.test(urlinfo);
+      if (!patbool) return;
+
+      const nowCategorie = urlinfo.split("/")[2];
+      $categoryBar.querySelector(`#${nowCategorie}`).classList.add("select");
+    }
+  },
+  topCategoriesBarScroll: function () {
+    const $categoryBarItems = document.getElementById("category-bar-items");
+    if (!$categoryBarItems) return;
+
+    $categoryBarItems.addEventListener("mousewheel", function (e) {
+      const v = -e.wheelDelta / 2;
+      this.scrollLeft += v;
+      e.preventDefault();
+    });
+  },
+  // 切换菜单显示热评
+  switchRightClickMenuHotReview: function () {
+    const postComment = document.getElementById("post-comment")
+    const menuCommentBarrageDom = document.getElementById("menu-commentBarrage")
+    if (postComment) {
+      menuCommentBarrageDom.style.display = "flex"
+    } else {
+      menuCommentBarrageDom.style.display = "none"
+    }
+  }
 };
