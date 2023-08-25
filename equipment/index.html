@@ -3,7 +3,7 @@
   preloader: {"source":3},
   friends_vue_info: undefined,
   navMusic: true,
-  mainTone: {"mode":"api","api":"https://img2color-go.vercel.app/api?img=","cover_change":false},
+  mainTone: undefined,
   authorStatus: {"skills":["🤖️ 数码科技爱好者","🔍 分享与热心帮助","🔨 设计开发一条龙","🤝 专修交互与设计","🏃 脚踏实地行动派","🧱 团队小组发动机"]},
   algolia: undefined,
   localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
@@ -369,7 +369,7 @@ queueMicrotask(() => {
       path: window.location.pathname,
       comment: false,
       imageUploader: true,
-    }, {"pageSize":10,"requiredMeta":["nick","mail"],"login":"enable","copyright":true,"locale":{"admin":"安知鱼","sofa":"欢迎使用 安知鱼 主题！","placeholder":"生活明朗，万物可爱"}}))
+    }, {"pageSize":10,"requiredMeta":["nick","mail"],"login":"enable","copyright":true,"locale":{"admin":"GistWillan","sofa":"来留下第一条留言吧","placeholder":"你好世界"}}))
   }
 
   const walineCSSLoad = document.getElementById('waline-css')
