@@ -1,14 +1,16 @@
 // 第一次播放音乐
 var anzhiyu_musicFirst = false;
+// 快捷键
+var anzhiyu_keyboard = null;
 // 音乐播放状态
 var anzhiyu_musicPlaying = false;
-// 是否开启快捷键
-var anzhiyu_keyboard = localStorage.getItem("keyboardToggle") ? localStorage.getItem("keyboardToggle") : false;
 var $web_container = document.getElementById("web_container");
 var $web_box = document.getElementById("web_box");
 var $bodyWrap = document.getElementById("body-wrap");
 var $main = document.querySelector("main");
 var dragStartX;
+
+var popupWindowTimer = null
 
 var adjectives = [
   "美丽的",
@@ -288,8 +290,8 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   /**
-   * 代碼
-   * 只適用於Hexo默認的代碼渲染
+   * 代码
+   * 只适用于Hexo默认的代码渲染
    */
   const addHighlightTool = function () {
     const highLight = GLOBAL_CONFIG.highlight;
@@ -420,7 +422,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         $figureHighlight.forEach(function (item) {
           let langName = item.getAttribute("class").split(" ")[1];
-          if (langName === "plain" || langName === undefined) langName = "Code";
+          if (langName === "plain" || langName === undefined || langName === "plaintext") langName = "Code";
           const highlightLangEle = `<div class="code-lang">${langName}</div>`;
           createEle(highlightLangEle, item, "hl");
         });
@@ -493,7 +495,7 @@ document.addEventListener("DOMContentLoaded", function () {
         i.insertAdjacentHTML("beforeend", htmlStr(arr));
         i.classList.remove("lazyload");
       }
-      window.lazyLoadInstance.update();
+      window.lazyLoadInstance && window.lazyLoadInstance.update();
       return arrLength > loadItem ? loadItem : arrLength;
     };
 
@@ -507,6 +509,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!item.classList.contains("lazyload") || arr.length < limit) {
         // 不懒加载
         item.innerHTML = htmlStr(arr);
+        item.nextElementSibling.style.display = "none";
       } else {
         if (!item.classList.contains("btn_album_detail_lazyload") || item.classList.contains("page_img_lazyload")) {
           // 滚动懒加载
@@ -554,7 +557,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       anzhiyu.initJustifiedGallery(item);
       anzhiyu.loadLightbox(item.querySelectorAll("img"));
-      window.lazyLoadInstance.update();
+      window.lazyLoadInstance && window.lazyLoadInstance.update();
     };
 
     const addJustifiedGallery = () => {
@@ -598,6 +601,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let initTop = 0;
     let isChatShow = true;
     const $header = document.getElementById("page-header");
+    const $popupWindow = document.getElementById('popup-window')
     const isChatBtnHide = typeof chatBtnHide === "function";
     const isChatBtnShow = typeof chatBtnShow === "function";
 
@@ -671,7 +675,23 @@ document.addEventListener("DOMContentLoaded", function () {
         // ignore small scrolls
         return;
       }
+      if ($popupWindow && $popupWindow.classList.contains('show-popup-window') && currentTop > 60 && delta > 20 && lastScrollTop != 0) {
+        // 滚动后延迟1s关闭弹窗
+        anzhiyu.throttle(() => {
+          if (popupWindowTimer) clearTimeout(popupWindowTimer)
+          popupWindowTimer = setTimeout(() => {
+            if (!$popupWindow.classList.contains("popup-hide")) {
+              $popupWindow.classList.add('popup-hide');
+            }
+            setTimeout(() => {
+              $popupWindow.classList.remove('popup-hide');
+              $popupWindow.classList.remove('show-popup-window');
+            }, 1000)
+          }, 1000);
+        }, 1000)()
+      }
       lastScrollTop = currentTop;
+
       if (currentTop > 26) {
         if (isDown) {
           if ($header.classList.contains("nav-visible")) $header.classList.remove("nav-visible");
@@ -898,30 +918,6 @@ document.addEventListener("DOMContentLoaded", function () {
         : saveToLocal.set("aside-status", "hide", 2);
       $htmlDom.toggle("hide-aside");
     },
-    switchConsole: () => {
-      // switch console
-      const consoleEl = document.getElementById("console");
-      //初始化隐藏边栏
-      const $htmlDom = document.documentElement.classList;
-      $htmlDom.contains("hide-aside")
-        ? document.querySelector("#consoleHideAside").classList.add("on")
-        : document.querySelector("#consoleHideAside").classList.remove("on");
-      if (consoleEl.classList.contains("show")) {
-        consoleEl.classList.remove("show");
-      } else {
-        consoleEl.classList.add("show");
-      }
-      const consoleKeyboard = document.querySelector("#consoleKeyboard");
-      if (consoleKeyboard) {
-        if (localStorage.getItem("keyboardToggle") === "true") {
-          consoleKeyboard.classList.add("on");
-          anzhiyu_keyboard = true;
-        } else {
-          consoleKeyboard.classList.remove("on");
-          anzhiyu_keyboard = false;
-        }
-      }
-    },
 
     runMobileToc: () => {
       if (window.getComputedStyle(document.getElementById("card-toc")).getPropertyValue("opacity") === "0")
@@ -950,9 +946,6 @@ document.addEventListener("DOMContentLoaded", function () {
         break;
       case "hide-aside-btn":
         rightSideFn.hideAsideBtn();
-        break;
-      case "center-console":
-        rightSideFn.switchConsole();
         break;
       default:
         break;
@@ -1164,11 +1157,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  const relativeDate = function (selector) {
+  const relativeDate = function (selector, simple = false) {
     selector.forEach(item => {
       const $this = item;
       const timeVal = $this.getAttribute("datetime");
-      $this.innerText = anzhiyu.diffDate(timeVal, true);
+      if (simple) {
+        $this.innerText = anzhiyu.diffDate(timeVal, false, simple);
+      } else {
+        $this.innerText = anzhiyu.diffDate(timeVal, true);
+      }
       $this.style.display = "inline";
     });
   };
@@ -1261,57 +1258,139 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   //封面纯色
-  const coverColor = () => {
+  const coverColor = async () => {
     const root = document.querySelector(":root");
     const path = document.getElementById("post-top-bg")?.src;
-
     if (!path) {
+      // 非文章情况，直接设置不需要请求了
       root.style.setProperty("--anzhiyu-bar-background", "var(--anzhiyu-meta-theme-color)");
       anzhiyu.initThemeColor();
 
-      if (GLOBAL_CONFIG.changeMainColorPost) {
-        document.documentElement.style.setProperty(
-          "--anzhiyu-main",
-          getComputedStyle(document.documentElement).getPropertyValue("--anzhiyu-theme")
-        );
-      }
+      // 要改回来默认主色
+      document.documentElement.style.setProperty(
+        "--anzhiyu-main",
+        getComputedStyle(document.documentElement).getPropertyValue("--anzhiyu-theme")
+      );
+      document.documentElement.style.setProperty(
+        "--anzhiyu-theme-op",
+        getComputedStyle(document.documentElement).getPropertyValue("--anzhiyu-main") + "23"
+      );
+      document.documentElement.style.setProperty(
+        "--anzhiyu-theme-op-deep",
+        getComputedStyle(document.documentElement).getPropertyValue("--anzhiyu-main") + "dd"
+      );
 
       return;
     }
 
-    const httpRequest = new XMLHttpRequest();
-    httpRequest.open("GET", `${path}?imageAve`, true);
-    httpRequest.send();
-
-    httpRequest.onreadystatechange = () => {
-      const isRequestCompleted = httpRequest.readyState === 4;
-      const isSuccess = isRequestCompleted && httpRequest.status === 200;
-
-      let value;
-
-      if (isSuccess) {
-        try {
-          const obj = JSON.parse(httpRequest.responseText);
-          value = "#" + obj.RGB.slice(2);
-
-          if (getContrastYIQ(value) === "light") {
-            value = LightenDarkenColor(colorHex(value), -40);
-          }
-        } catch (err) {
-          value = "var(--anzhiyu-theme)";
+    // 文章内
+    if (GLOBAL_CONFIG.mainTone) {
+      if (GLOBAL_CONFIG_SITE.postMainColor) {
+        let value = GLOBAL_CONFIG_SITE.postMainColor
+        if (getContrastYIQ(value) === "light") {
+          value = LightenDarkenColor(colorHex(value), -40);
         }
-      } else if (isRequestCompleted) {
-        value = "var(--anzhiyu-theme)";
-      }
 
-      if (value) {
         root.style.setProperty("--anzhiyu-bar-background", value);
         anzhiyu.initThemeColor();
-        if (GLOBAL_CONFIG.changeMainColorPost) {
+
+        if (GLOBAL_CONFIG.mainTone.cover_change) {
           document.documentElement.style.setProperty("--anzhiyu-main", value);
+          document.documentElement.style.setProperty(
+            "--anzhiyu-theme-op",
+            getComputedStyle(document.documentElement).getPropertyValue("--anzhiyu-main") + "23"
+          );
+          document.documentElement.style.setProperty(
+            "--anzhiyu-theme-op-deep",
+            getComputedStyle(document.documentElement).getPropertyValue("--anzhiyu-main") + "dd"
+          );
+        }
+      } else {
+        const fallbackValue = "var(--anzhiyu-theme)";
+        let fetchPath = "";
+        if (GLOBAL_CONFIG.mainTone.mode == "cdn" || GLOBAL_CONFIG.mainTone.mode == "both") {
+          fetchPath = path + "?imageAve";
+        } else if (GLOBAL_CONFIG.mainTone.mode == "api") {
+          fetchPath = GLOBAL_CONFIG.mainTone.api + path;
+        }
+        // cdn/api模式请求
+        try {
+          const response = await fetch(fetchPath);
+          if (response.ok && response.headers.get("content-type")?.includes("application/json")) {
+            const obj = await response.json();
+            let value =
+              GLOBAL_CONFIG.mainTone.mode == "cdn" || GLOBAL_CONFIG.mainTone.mode == "both"
+                ? "#" + obj.RGB.slice(2)
+                : obj.RGB;
+            if (getContrastYIQ(value) === "light") {
+              value = LightenDarkenColor(colorHex(value), -40);
+            }
+
+            root.style.setProperty("--anzhiyu-bar-background", value);
+            anzhiyu.initThemeColor();
+
+            if (GLOBAL_CONFIG.mainTone.cover_change) {
+              document.documentElement.style.setProperty("--anzhiyu-main", value);
+              document.documentElement.style.setProperty(
+                "--anzhiyu-theme-op",
+                getComputedStyle(document.documentElement).getPropertyValue("--anzhiyu-main") + "23"
+              );
+              document.documentElement.style.setProperty(
+                "--anzhiyu-theme-op-deep",
+                getComputedStyle(document.documentElement).getPropertyValue("--anzhiyu-main") + "dd"
+              );
+            }
+          } else {
+            if (GLOBAL_CONFIG.mainTone.mode == "both") {
+              // both继续请求
+              try {
+                const response = await fetch(GLOBAL_CONFIG.mainTone.api + path);
+                if (response.ok && response.headers.get("content-type")?.includes("application/json")) {
+                  const obj = await response.json();
+                  let value = obj.RGB;
+
+                  if (getContrastYIQ(value) === "light") {
+                    value = LightenDarkenColor(colorHex(value), -40);
+                  }
+
+                  root.style.setProperty("--anzhiyu-bar-background", value);
+                  anzhiyu.initThemeColor();
+
+                  if (GLOBAL_CONFIG.mainTone.cover_change) {
+                    document.documentElement.style.setProperty("--anzhiyu-main", value);
+                    document.documentElement.style.setProperty(
+                      "--anzhiyu-theme-op",
+                      getComputedStyle(document.documentElement).getPropertyValue("--anzhiyu-main") + "23"
+                    );
+                    document.documentElement.style.setProperty(
+                      "--anzhiyu-theme-op-deep",
+                      getComputedStyle(document.documentElement).getPropertyValue("--anzhiyu-main") + "dd"
+                    );
+                  }
+                } else {
+                  root.style.setProperty("--anzhiyu-bar-background", fallbackValue);
+                  anzhiyu.initThemeColor();
+                  document.documentElement.style.setProperty("--anzhiyu-main", fallbackValue);
+                }
+              } catch {
+                root.style.setProperty("--anzhiyu-bar-background", fallbackValue);
+                anzhiyu.initThemeColor();
+                document.documentElement.style.setProperty("--anzhiyu-main", fallbackValue);
+              }
+            } else {
+              root.style.setProperty("--anzhiyu-bar-background", fallbackValue);
+              anzhiyu.initThemeColor();
+              document.documentElement.style.setProperty("--anzhiyu-main", fallbackValue);
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching data:", err);
+          root.style.setProperty("--anzhiyu-bar-background", fallbackValue);
+          anzhiyu.initThemeColor();
+          document.documentElement.style.setProperty("--anzhiyu-main", fallbackValue);
         }
       }
-    };
+    }
   };
 
   //RGB颜色转化为16进制颜色
@@ -1449,12 +1528,19 @@ document.addEventListener("DOMContentLoaded", function () {
       anzhiyu.isHidden(document.getElementById("toggle-menu")) && mobileSidebarOpen && sidebarFn.close();
     });
 
+    anzhiyu.darkModeStatus();
+
     document.getElementById("menu-mask").addEventListener("click", e => {
       sidebarFn.close();
     });
     GLOBAL_CONFIG.islazyload && lazyloadImg();
     GLOBAL_CONFIG.copyright !== undefined && addCopyright();
     GLOBAL_CONFIG.navMusic && listenNavMusicPause();
+    if (GLOBAL_CONFIG.shortcutKey && document.getElementById("consoleKeyboard")) {
+      localStorage.setItem("keyboardToggle", "true");
+      document.getElementById("consoleKeyboard").classList.add("on");
+      anzhiyu_keyboard = true;
+    }
     clickFnOfSubMenu();
   };
 
@@ -1465,7 +1551,11 @@ document.addEventListener("DOMContentLoaded", function () {
       GLOBAL_CONFIG.noticeOutdate !== undefined && addPostOutdateNotice();
       GLOBAL_CONFIG.relativeDate.post && relativeDate(document.querySelectorAll("#post-meta time"));
     } else {
-      GLOBAL_CONFIG.relativeDate.homepage && relativeDate(document.querySelectorAll("#recent-posts time"));
+      if (GLOBAL_CONFIG.relativeDate.homepage) {
+        relativeDate(document.querySelectorAll("#recent-posts time"));
+      } else if (GLOBAL_CONFIG.relativeDate.simplehomepage) {
+        relativeDate(document.querySelectorAll("#recent-posts time"), true);
+      }
       GLOBAL_CONFIG.runtime && addRuntime();
       addLastPushDate();
       toggleCardCategory();
@@ -1476,6 +1566,9 @@ document.addEventListener("DOMContentLoaded", function () {
     addHighlightTool();
     GLOBAL_CONFIG.isPhotoFigcaption && addPhotoFigcaption();
     scrollFn();
+
+    // 刷新时第一次滚动百分比
+    window.scrollCollect && window.scrollCollect();
 
     const $jgEle = document.querySelectorAll("#content-inner .fj-gallery");
     $jgEle.length && runJustifiedGallery($jgEle);
