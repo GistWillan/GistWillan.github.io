@@ -4,6 +4,35 @@
   
     
     <entry>
+      <title>如何使用云服务器搭建网盘</title>
+      <link href="/2024/05/25/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA%E7%BD%91%E7%9B%98/"/>
+      <url>/2024/05/25/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA%E7%BD%91%E7%9B%98/</url>
+      
+        <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在2024年的今天，在国内的各家网盘如果不开会员就有各个限制，比如：限速、限制上传&#x2F;下载文件数量、限制功能等，即便是一些国外网盘在国内使用起来也有一点麻烦。那么今天就教各位如何使用云服务器搭建属于自己的私人网盘，可绑定微软E5网盘。</p><h1 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h1><p>购买云服务器<br>这里我推荐使用雨云，价格比国内的云服务器厂商便宜很多，输入我的优惠码：GistWill 或点击：<br><a href="https://www.rainyun.com/GistWill">https://www.rainyun.com/GistWill</a>_ 就可以获得首月5折优惠券。<br>进入首页，点击云服务器-购买云服务器。选择香港地区服务器入门版服务器，美国地区的入门版服务器也行，毕竟只是创建私人网盘，如果后续有更多性能需求升级服务器配置即可，操作系统和预装App选择如下图<br><img src="https://gistwillan-kod.oss-cn-shanghai.aliyuncs.com/halo/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-05-25%20183854.png"><br>然后点击立即购买即可，如果想先试用觉得合适再付费也可以选择试用。</p><h2 id="域名"><a href="#域名" class="headerlink" title="域名"></a>域名</h2><p>接下来给注册域名，可以去腾讯云、阿里云和雨云等平台注册域名，也可以使用雨云的免费二级域名。<br>腾讯云注册地址：<a href="https://curl.qcloud.com/">https://curl.qcloud.com/</a><br>阿里云注册地址：<a href="https://www.aliyun.com/">https://www.aliyun.com/</a><br>雨云优惠注册地址：<br><a href="https://www.rainyun.com/GistWill">https://www.rainyun.com/GistWill</a>_<br>下面以雨云的为例，注册一个gistwillan.top的域名。<br>在云产品里找到域名服务。返回首页点击云产品，然后找到域名服务点击进入查看，进入后点击域名注册，搜索自己想注册的域名，点然后注册就行，按照提示输入信息，填写完信息后点击立即注册，然后等待审核完成就行。<br>具体如图：<br><img src="https://gistwillan-kod.oss-cn-shanghai.aliyuncs.com/halo/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-05-25%20192359.png"><br>当然有能力的也可以绑定自己的域名。</p><h2 id="开始搭建"><a href="#开始搭建" class="headerlink" title="开始搭建"></a>开始搭建</h2><p>购买云服务器之后就会开始创建，创建完后往下滑找到预安装APP信息，里面的输出结果就是账号和密码的具体信息了，如下图演示：<br><img src="https://gistwillan-kod.oss-cn-shanghai.aliyuncs.com/halo/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-05-25%20184529.png"><br>在通过IP访问之前需要开放端口访问，往上滑点击防火墙规则，然后点击添加防火墙规则。动作选择允许，源地址填0.0.0.0&#x2F;0，端口填写5212，协议选择TCP，点击确定即可。<br>接下来给服务器绑定域名，如果有能力的话可以绑定自己的域名,或者自己会的话直接自己操作就行了。</p><h2 id="绑定域名并开启SSL-x2F-HTTPS访问"><a href="#绑定域名并开启SSL-x2F-HTTPS访问" class="headerlink" title="绑定域名并开启SSL&#x2F;HTTPS访问"></a>绑定域名并开启SSL&#x2F;HTTPS访问</h2><p>如果你是绑定的自己域名的话这步可以跳过，如果你用的是在雨云注册的域名就继续看。<br>点击远程连接，选择Xtermjs模式，进入后先回车，用户输入root，密码右键粘贴后直接回车，成功登录后在终端中输入以下命令安装宝塔面板：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget -O install.sh https://download.bt.cn/install/install-ubuntu_6.0.sh &amp;&amp; bash install.sh ed8484bec</span><br></pre></td></tr></table></figure><p>然后输入y再按回车确定，安装完成后记下登陆地址和账号密码，由于登陆宝塔需要绑定宝塔账号，所以需要提前注册宝塔账号。<br><img src="https://gistwillan-kod.oss-cn-shanghai.aliyuncs.com/halo/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-05-25%20200257.png"><br>登录进去后选择LNMP套件编译安装就行，等待一段时间等他自动安装完成。别忘了开放对应端口。<br><img src="https://gistwillan-kod.oss-cn-shanghai.aliyuncs.com/halo/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-05-25%20201827.png"><br><img src="https://gistwillan-kod.oss-cn-shanghai.aliyuncs.com/halo/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-05-25%20202103.png"><br>然后等待安装完成即可进行下一步。</p><h2 id="设置域名解析"><a href="#设置域名解析" class="headerlink" title="设置域名解析"></a>设置域名解析</h2><p>到域名解析控制台，添加记录，主机名称自己输入一个名字，比如输入drive，访问网站的时候就是drive.gistwillan.top，输入@，访问网站就直接访问gistwillan.top，记录值输入自己服务器的IP。<br><img src="https://gistwillan-kod.oss-cn-shanghai.aliyuncs.com/halo/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-05-25%20202803.png"><br>也可以使用雨云的免费二级域名。选择类型A，子域名自己输入一个喜欢的，主域名如果你用内地服务器就只能选那个备案域名。创建后在下面可以看到，取消勾选CF代理。</p><h2 id="创建网站"><a href="#创建网站" class="headerlink" title="创建网站"></a>创建网站</h2><p>到宝塔面板添加一个站点，输入你自己的域名，直接点提交。</p><h2 id="开启HTTPS-x2F-SSL"><a href="#开启HTTPS-x2F-SSL" class="headerlink" title="开启HTTPS&#x2F;SSL"></a>开启HTTPS&#x2F;SSL</h2><p>开启SSL后可以以https形式访问网站，与网站之间的通信会加密，这样浏览器就不会显示不安全了。<br>在宝塔面板中找到SSL证书申请，点击申请证书。<br>如图所示，把强制HTTPS勾选上。<br><img src="https://gistwillan-kod.oss-cn-shanghai.aliyuncs.com/halo/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-05-25%20204027.png"><br>最后创建反代即可访问</p><h2 id="开始配置"><a href="#开始配置" class="headerlink" title="开始配置"></a>开始配置</h2><p>使用域名访问Cloudreve，复制之前在输出结果的用户名和密码。<br>登陆成功后如下图演示：<br><img src="https://gistwillan-kod.oss-cn-shanghai.aliyuncs.com/halo/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-05-25%20185247.png"><br>点击右上角头像，然后点击管理面板，出现提示窗口点忽略即可，进入之后如下图：<br><img src="https://gistwillan-kod.oss-cn-shanghai.aliyuncs.com/halo/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-05-25%20185502.png"><br>点击旁边的存储策略，然后点击上面的添加存储策略，如下图：<br><img src="https://gistwillan-kod.oss-cn-shanghai.aliyuncs.com/halo/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-05-25%20185629.png"><br>点击OneDrive ，绑定微软E5账号。</p><h2 id="绑定微软E5账号"><a href="#绑定微软E5账号" class="headerlink" title="绑定微软E5账号"></a>绑定微软E5账号</h2><p>按照步骤填写，如下图：<br><img src="https://gistwillan-kod.oss-cn-shanghai.aliyuncs.com/halo/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-05-25%20212552.png"><br>最后到第五步就点击转到授权页面，点蓝色按钮然后就添加完成了。<br><img src="https://gistwillan-kod.oss-cn-shanghai.aliyuncs.com/halo/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-05-25%20213218.png"><br>接下来更改用户设置，点击左边导航栏的用户组，点击Admin，存储策略更改为OneDrive，剩下的可以根据自己喜好更改，更改完后点保存。<br><img src="https://gistwillan-kod.oss-cn-shanghai.aliyuncs.com/halo/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-05-25%20213512.png"></p><h2 id="完成"><a href="#完成" class="headerlink" title="完成"></a>完成</h2><p>接下来点击右上角房子返回主页，随便传输一点文件，能够正常传输即为完成。<br><img src="https://gistwillan-kod.oss-cn-shanghai.aliyuncs.com/halo/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-05-25%20213907.png"><br>可以看到文件是可以正常传输的，上传速度挺快的。大致速度就看你网速怎么样。</p><h1 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h1><p>最后别忘了给宝塔跟Cloudreve更改用户名和密码以及设置2FA（2步验证），为了安全起见以免被盗。<br>关于Cloudreve更多个性化设置可以自行发掘，下篇文章再见。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 教程 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 教程 </tag>
+            
+            <tag> 云服务器 </tag>
+            
+            <tag> 网盘 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>iPhone5在2024年的使用体验</title>
       <link href="/2024/04/07/iPhone5%E5%9C%A82024%E5%B9%B4%E7%9A%84%E4%BD%BF%E7%94%A8%E4%BD%93%E9%AA%8C/"/>
       <url>/2024/04/07/iPhone5%E5%9C%A82024%E5%B9%B4%E7%9A%84%E4%BD%BF%E7%94%A8%E4%BD%93%E9%AA%8C/</url>
