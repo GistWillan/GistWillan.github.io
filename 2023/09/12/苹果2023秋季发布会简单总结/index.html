@@ -1054,4 +1054,191 @@ document.addEventListener('pjax:error', (e) => {
   if (e.request.status === 404) {
     pjax.loadUrl('/404.html')
   }
-})</script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/haruto.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body></html>
+})</script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="anzhiyuPopupManager"><div class="anzhiyu-popup-wrapper"><div class="anzhiyu-popup-container"><div class="anzhiyu-popup-header"><i class="anzhiyufont anzhiyu-icon-volume-warning"></i><div class="anzhiyu-popup-title"></div><button class="anzhiyu-popup-close"><i class="anzhiyufont anzhiyu-icon-close"></i></button></div><div class="anzhiyu-popup-content"></div><div class="anzhiyu-popup-footer"><a class="anzhiyu-popup-button" href="#" target="_blank" rel="noopener noreferrer nofollow"><i class="anzhiyufont anzhiyu-icon-external-link-alt"></i><span>查看详情</span></a></div></div></div></div><style>#anzhiyuPopupManager {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+#anzhiyuPopupManager.visible {
+  opacity: 1;
+}
+.anzhiyu-popup-wrapper {
+  background: var(--anzhiyu-card-bg);
+  border-radius: 12px;
+  box-shadow: var(--anzhiyu-shadow-light);
+  max-width: 480px;
+  width: 90%;
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+  overflow: hidden;
+}
+.anzhiyu-popup-wrapper.show {
+  transform: scale(1);
+}
+.anzhiyu-popup-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--anzhiyu-border);
+}
+.anzhiyu-popup-header i {
+  color: var(--anzhiyu-main);
+  margin-right: 10px;
+  font-size: 18px;
+}
+.anzhiyu-popup-title {
+  flex: 1;
+  font-weight: bold;
+  font-size: 16px;
+  color: var(--anzhiyu-fontcolor);
+}
+.anzhiyu-popup-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--anzhiyu-fontcolor);
+  opacity: 0.7;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+.anzhiyu-popup-close:hover {
+  opacity: 1;
+  background-color: var(--anzhiyu-hover-bg);
+}
+.anzhiyu-popup-content {
+  padding: 20px;
+  color: var(--anzhiyu-fontcolor);
+  line-height: 1.6;
+}
+.anzhiyu-popup-footer {
+  padding: 0 20px 20px;
+  text-align: right;
+}
+.anzhiyu-popup-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: var(--anzhiyu-main);
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+.anzhiyu-popup-button:hover {
+  background-color: var(--anzhiyu-hover-bg);
+  transform: translateY(-1px);
+}
+.anzhiyu-popup-button i {
+  margin-right: 6px;
+}
+@media (max-width: 768px) {
+  .anzhiyu-popup-wrapper {
+    width: 95%;
+    margin: 0 10px;
+  }
+}
+</style><script>// 弹窗管理器
+class anzhiyuPopupManager {
+  constructor() {
+    this.popupQueue = [];
+    this.isPopupVisible = false;
+    this.currentPopup = null;
+    this.popupElement = document.querySelector('#anzhiyuPopupManager');
+    this.popupWrapper = document.querySelector('.anzhiyu-popup-wrapper');
+    this.popupTitle = document.querySelector('.anzhiyu-popup-title');
+    this.popupContent = document.querySelector('.anzhiyu-popup-content');
+    this.popupButton = document.querySelector('.anzhiyu-popup-button');
+    this.popupClose = document.querySelector('.anzhiyu-popup-close');
+    this.timer = null;
+    
+    // 添加事件监听
+    if (this.popupClose) {
+      this.popupClose.addEventListener('click', () => this.closePopup());
+    }
+    if (this.popupButton) {
+      this.popupButton.addEventListener('click', () => {
+        this.closePopup();
+        // 如果是隐私协议弹窗，标记为已接受
+        if (this.currentPopup && this.currentPopup.title === '协议提醒助手') {
+          localStorage.setItem('privacyAgreementAccepted', 'true');
+        }
+      });
+    }
+  }
+  
+  // 添加弹窗到队列
+  enqueuePopup(title, content, buttonLink, autoCloseTime) {
+    this.popupQueue.push({
+      title: title,
+      content: content,
+      buttonLink: buttonLink,
+      autoCloseTime: autoCloseTime
+    });
+    
+    if (!this.isPopupVisible) {
+      this.showNextPopup();
+    }
+  }
+  
+  // 显示下一个弹窗
+  showNextPopup() {
+    if (this.popupQueue.length === 0) {
+      return;
+    }
+    
+    this.currentPopup = this.popupQueue.shift();
+    if (this.popupTitle) this.popupTitle.textContent = this.currentPopup.title;
+    if (this.popupContent) this.popupContent.textContent = this.currentPopup.content;
+    if (this.popupButton) this.popupButton.href = this.currentPopup.buttonLink;
+    
+    // 显示弹窗
+    if (this.popupElement) {
+      this.popupElement.style.display = 'flex';
+      setTimeout(() => {
+        if (this.popupElement) this.popupElement.classList.add('visible');
+        if (this.popupWrapper) this.popupWrapper.classList.add('show');
+        this.isPopupVisible = true;
+      }, 10);
+    }
+    
+    // 设置自动关闭
+    if (this.currentPopup.autoCloseTime) {
+      this.timer = setTimeout(() => {
+        this.closePopup();
+      }, this.currentPopup.autoCloseTime);
+    }
+  }
+  
+  // 关闭当前弹窗
+  closePopup() {
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+    
+    if (this.popupElement) this.popupElement.classList.remove('visible');
+    if (this.popupWrapper) this.popupWrapper.classList.remove('show');
+    
+    setTimeout(() => {
+      if (this.popupElement) this.popupElement.style.display = 'none';
+      this.isPopupVisible = false;
+      this.showNextPopup();
+    }, 300);
+  }
+}
+
+// 初始化弹窗管理器
+document.addEventListener('DOMContentLoaded', function() {
+  window.anzhiyuPopupManager = new anzhiyuPopupManager();
+});</script><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/haruto.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body></html>
