@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>CD-ROM和B站视频归档资源站加速访问教程</title>
+      <link href="/2025/09/02/CD-ROM%E5%92%8CB%E7%AB%99%E8%A7%86%E9%A2%91%E5%BD%92%E6%A1%A3%E8%B5%84%E6%BA%90%E7%AB%99%E5%8A%A0%E9%80%9F%E8%AE%BF%E9%97%AE%E6%95%99%E7%A8%8B/"/>
+      <url>/2025/09/02/CD-ROM%E5%92%8CB%E7%AB%99%E8%A7%86%E9%A2%91%E5%BD%92%E6%A1%A3%E8%B5%84%E6%BA%90%E7%AB%99%E5%8A%A0%E9%80%9F%E8%AE%BF%E9%97%AE%E6%95%99%E7%A8%8B/</url>
+      
+        <content type="html"><![CDATA[<h1 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h1><p>如果你是中国大陆用户并且觉得之前零度的教程太复杂，那么这个教程提供的方法相对而言会比<a href="https://www.freedidi.com/17962.html">零度</a>的简单。</p><h2 id="CD-ROM资源归档站加速"><a href="#CD-ROM资源归档站加速" class="headerlink" title="CD-ROM资源归档站加速"></a>CD-ROM资源归档站加速</h2><p>首先，你需要下载<a href="https://steampp.net/">Watt Toolkit</a>和<a href="https://www.freedownloadmanager.org/zh/">FreeDownloadManager</a><br>打开WattToolkit，点击“网络加速”。点进去之后将所有可选项选中之后点加速（我目前不太确定这里面的哪个加速项加快了下载请求）<br>之后选择你想要下载的CDROM资源，滑倒最下面右键下载复制链接到FreeDownloadManager之后下载，下载速度会慢慢上去<br>如果下载速度慢的话有可能是下载器设置默认限速了，解决方法就是点击右上角选择“选项”，进入后点击“限速”把限速的选项改成不限速即可。<br>下载器不一定要选择FDM，还可以选择其他支持多线程下载的下载器，比如：<a href="https://motrix.app/zh-CN/download">Motrix</a>、IDM等之类的下载器。</p><h2 id="B站资源归档站加速"><a href="#B站资源归档站加速" class="headerlink" title="B站资源归档站加速"></a>B站资源归档站加速</h2><p>这个只需要下载<a href="https://steampp.net/">Watt Toolkit</a>即可，然后安装完打开点击“网络加速”，点进去之后将所有可选项选中之后点加速（我目前不太确定这里面的哪个加速项加快了下载请求）。<br>之后直接进入B站视频归档站，随便点一个视频看看，也可以试试看换一个播放器，加载速度可能会比原本没开“网络加速”的速度快。</p><h2 id="加速器"><a href="#加速器" class="headerlink" title="加速器"></a>加速器</h2><p>如果你觉得上面的方式还是有点复杂，那我推荐你直接购买现成的网络加速器。可<a href="https://blog.gistwillan.top/2024/09/30/%E7%BD%91%E7%BB%9C%E5%8A%A0%E9%80%9F%E5%99%A8%E6%8E%A8%E5%B9%BF/">点此查看</a>了解更多。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 教程 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 教程 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>资源合集分享-长期有效免费下载</title>
       <link href="/2025/04/12/%E8%B5%84%E6%BA%90%E5%90%88%E9%9B%86%E5%88%86%E4%BA%AB-%E9%95%BF%E6%9C%9F%E6%9C%89%E6%95%88%E5%85%8D%E8%B4%B9%E4%B8%8B%E8%BD%BD/"/>
       <url>/2025/04/12/%E8%B5%84%E6%BA%90%E5%90%88%E9%9B%86%E5%88%86%E4%BA%AB-%E9%95%BF%E6%9C%9F%E6%9C%89%E6%95%88%E5%85%8D%E8%B4%B9%E4%B8%8B%E8%BD%BD/</url>
