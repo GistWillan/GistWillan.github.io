@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>iPad Air 1 (A7) 降级 iOS 10.3.3 全记录 (Linux 版)</title>
+      <link href="/2026/03/08/iPad-Air-1-A7-%E9%99%8D%E7%BA%A7-iOS-10-3-3-%E5%85%A8%E8%AE%B0%E5%BD%95-Linux-%E7%89%88/"/>
+      <url>/2026/03/08/iPad-Air-1-A7-%E9%99%8D%E7%BA%A7-iOS-10-3-3-%E5%85%A8%E8%AE%B0%E5%BD%95-Linux-%E7%89%88/</url>
+      
+        <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>iPad Air 1 代（型号 A1474&#x2F;A1475）曾是平板电脑的巅峰之作，但随着系统更新到 iOS 12.5.8，那颗 A7 芯片在沉重的系统负荷下已显老态。为了让这台老机器重焕生机，降级到 <strong>iOS 10.3.3</strong> 是目前公认的最优解。</p><p>得益于 A7 设备拥有 ​<strong>iOS 10.3.3 的 OTA 签名（永不关闭）</strong>​，我们可以通过 <strong>Legacy iOS Kit</strong> 这个强大的开源工具实现无 Blobs 降级。今天，我将带大家在 <strong>Linux</strong> 环境下完成这一操作，并利用大家熟悉的 <strong>爱思助手</strong> 来辅助监控设备状态。</p><hr><h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>在开始之前，请确保你拥有一台运行主流 Linux 发行版（推荐 Ubuntu 或 Mint）的电脑，以及一个良好的心态。</p><h3 id="1-硬件准备"><a href="#1-硬件准备" class="headerlink" title="1. 硬件准备"></a>1. 硬件准备</h3><ul><li>​<strong>设备</strong>​：iPad Air 1 (A7 芯片)。</li><li>​<strong>线缆</strong>​：​<strong>USB-A to Lightning 数据线</strong>​（尽量避免使用 USB-C 转接线，A7 设备在进入 DFU 模式时对线材极其挑剔）。</li><li>​<strong>电脑</strong>​：建议使用 Intel Core i系列 CPU 的机器，AMD 平台的 USB 控制器在运行 <code>checkm8</code> 漏洞攻击时极不稳定。</li></ul><h3 id="2-环境部署"><a href="#2-环境部署" class="headerlink" title="2. 环境部署"></a>2. 环境部署</h3><p>在终端中运行以下命令，安装必要的依赖库：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install git curl libimobiledevice-utils libusbmuxd-tools usbmuxd libusb-1.0-0-dev</span><br></pre></td></tr></table></figure><h3 id="3-工具下载"><a href="#3-工具下载" class="headerlink" title="3. 工具下载"></a>3. 工具下载</h3><p>克隆 Legacy iOS Kit 的仓库：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/LukeZGD/Legacy-iOS-Kit</span><br><span class="line"><span class="built_in">cd</span> Legacy-iOS-Kit</span><br></pre></td></tr></table></figure><h3 id="4-辅助工具：爱思助手"><a href="#4-辅助工具：爱思助手" class="headerlink" title="4. 辅助工具：爱思助手"></a>4. 辅助工具：爱思助手</h3><p>虽然我们在 Linux 下操作，但如果你的电脑装有 <strong>爱思助手 Linux 版</strong> 或通过虚拟机挂载 USB 观察，可以实时看到设备是处于 ​<strong>DFU 模式</strong>​、<strong>恢复模式</strong> 还是 ​<strong>正常模式</strong>​。这对初学者判断是否成功引导漏洞至关重要。</p><hr><h2 id="降级过程"><a href="#降级过程" class="headerlink" title="降级过程"></a>降级过程</h2><h3 id="第一步：启动脚本"><a href="#第一步：启动脚本" class="headerlink" title="第一步：启动脚本"></a>第一步：启动脚本</h3><p>在 <code>Legacy-iOS-Kit</code> 目录下，赋予执行权限并运行：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">chmod</span> +x restore.sh</span><br><span class="line">./restore.sh</span><br></pre></td></tr></table></figure><p>脚本会自动检查依赖，如果缺少组件，请按照提示输入密码进行自动安装，安装完成后会提醒你再运行一遍这个脚本以继续降级流程，如果设备已经插入了就重新插拔一下。</p><h3 id="第二步：识别设备与选择功能"><a href="#第二步：识别设备与选择功能" class="headerlink" title="第二步：识别设备与选择功能"></a>第二步：识别设备与选择功能</h3><p>重新运行这个脚本(restore.sh)并继续接下来的操作：</p><ol><li>连接 iPad，在主菜单中选择 ​<strong>Restore&#x2F;Downgrade</strong>​。</li><li>脚本会检测到你的设备为 <code>iPad4,1</code> (或对应型号)。</li><li>系统会询问目标版本，选择 ​<strong>iOS 10.3.3</strong>​。</li><li>脚本会询问你是否拥有固件。如果没有，选择 ​<strong>Download</strong>​，它会自动从苹果官方服务器下载对应的 IPSW(由于群我这边没有就选择 <strong>Download</strong>，完成后选择 <strong>Start Restore</strong>)。<br><img src="/images/25/1.jpg"></li></ol><h3 id="第三步：进入-DFU-模式-关键点"><a href="#第三步：进入-DFU-模式-关键点" class="headerlink" title="第三步：进入 DFU 模式 (关键点)"></a>第三步：进入 DFU 模式 (关键点)</h3><p>这是最容易失败的一步。请注意：</p><ol><li>根据脚本提示，手动将 iPad 进入 ​<strong>DFU 模式</strong>​（黑屏状态）。</li><li>​<strong>爱思助手辅助</strong>​：此时观察爱思助手，如果显示“DFU 模式”，则可以继续。</li><li>脚本将开始运行 <code>gaster</code> 或 <code>ipwndfu</code> 漏洞攻击。</li></ol><blockquote><p>​<strong>小贴士</strong>​：如果脚本卡在 “Sending iBSS” 或报错，请尝试更换 USB 接口（推荐 USB 2.0 接口）并重启脚本。其次就是中间可能要求插拔，插拔的动作尽量快一点，在提示出来后就要插拔。</p></blockquote><h3 id="第四步：执行恢复"><a href="#第四步：执行恢复" class="headerlink" title="第四步：执行恢复"></a>第四步：执行恢复</h3><p>一旦漏洞攻击成功，iPad 屏幕可能会闪过绿屏或出现苹果 Logo 以及进度条。Legacy iOS Kit 将会：</p><ol><li>提取 OTA 签名。</li><li>构建自定义恢复固件。</li><li>通过 <code>idevicerestore</code> 将固件刷入设备。</li></ol><h2 id="此时不要触碰数据线，静待终端提示-​-”Restore-done”-​。"><a href="#此时不要触碰数据线，静待终端提示-​-”Restore-done”-​。" class="headerlink" title="此时不要触碰数据线，静待终端提示 ​**”Restore done”**​。"></a>此时不要触碰数据线，静待终端提示 ​**”Restore done”**​。<br><img src="/images/25/done.png" alt="降级完成后控制台的样子"></h2><h2 id="成果展示与结尾"><a href="#成果展示与结尾" class="headerlink" title="成果展示与结尾"></a>成果展示与结尾</h2><p>当 iPad 重新亮起，看到那熟悉的 iOS 10 壁纸和滑动解锁时，所有的折腾都是值得的。相比 iOS 12，10.3.3 的流畅度提升了不止一个档次，无论是动画响应还是应用开启速度，都仿佛回到了 2017 年。<br><img src="/images/25/ipad.png" alt="降级完成"></p><h3 id="降级后的建议："><a href="#降级后的建议：" class="headerlink" title="降级后的建议："></a>降级后的建议：</h3><ul><li>​<strong>关闭自动更新</strong>​：安装一个屏蔽更新的描述文件。</li><li>​<strong>越狱</strong>​：iOS 10.3.3 可以使用 <strong>totally-not-spyware</strong> 进行网页越狱，非常方便。</li><li>​<strong>爱思助手核验</strong>​：再次连接爱思助手，你会看到系统版本已成功显示为 10.3.3，且设备处于激活状态。</li></ul><hr><blockquote><p>​<strong>写在最后</strong>​：Legacy iOS Kit 证明了开源社区的力量。如果你在操作过程中遇到 <code>checkm8</code> 报错，多试几次，换个接口，往往奇迹就在下一次尝试。</p></blockquote>]]></content>
+      
+      
+      <categories>
+          
+          <category> 教程 </category>
+          
+          <category> 旧科技&amp;改造优化 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 旧科技&amp;改造优化 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>新手站长变现指南：从AdSense到Adsterra/Monetag的平替之路</title>
       <link href="/2026/03/06/%E6%96%B0%E6%89%8B%E7%AB%99%E9%95%BF%E5%8F%98%E7%8E%B0%E6%8C%87%E5%8D%97%EF%BC%9A%E4%BB%8EAdSense%E5%88%B0Adsterra-Monetag%E7%9A%84%E5%B9%B3%E6%9B%BF%E4%B9%8B%E8%B7%AF/"/>
       <url>/2026/03/06/%E6%96%B0%E6%89%8B%E7%AB%99%E9%95%BF%E5%8F%98%E7%8E%B0%E6%8C%87%E5%8D%97%EF%BC%9A%E4%BB%8EAdSense%E5%88%B0Adsterra-Monetag%E7%9A%84%E5%B9%B3%E6%9B%BF%E4%B9%8B%E8%B7%AF/</url>
